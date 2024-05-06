@@ -1,0 +1,32 @@
+syntax = "proto3";
+package genre;
+
+// Définition du message Genre
+message Genre {
+  string id = 1;
+  string name = 2;
+}
+
+// Définition des messages de requête et de réponse pour les méthodes
+message GetGenreRequest {
+  string genre_id = 1;
+}
+
+message GetGenreResponse {
+  Genre genre = 1;
+}
+
+message SearchGenresRequest {
+  string query = 1;
+}
+
+message SearchGenresResponse {
+  repeated Genre genres = 1;
+}
+
+// Définition du service des genres
+service GenreService {
+  rpc GetGenre(GetGenreRequest) returns (GetGenreResponse);
+  rpc SearchGenres(SearchGenresRequest) returns (SearchGenresResponse);
+  // Ajouter d'autres méthodes au besoin
+}
