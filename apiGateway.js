@@ -34,172 +34,168 @@ let genres = [];
 /******************************************************
  * REST API Routes
  ******************************************************/
-
 // Create a new book
-app.post('/books', (req, res) => {
-    const newBook = req.body;
-    books.push(newBook);
+app.post('/books', async (req, res) => {
+  try {
+    const newBook = await Book.create(req.body);
     res.json(newBook);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
+
 // Create a new author
-app.post('/authors', (req, res) => {
-    const newAuthor = req.body;
-    authors.push(newAuthor);
+app.post('/authors', async (req, res) => {
+  try {
+    const newAuthor = await Author.create(req.body);
     res.json(newAuthor);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Create a new genre
-app.post('/genres', (req, res) => {
-    const newGenre = req.body;
-    genres.push(newGenre);
+app.post('/genres', async (req, res) => {
+  try {
+    const newGenre = await Genre.create(req.body);
     res.json(newGenre);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Delete a book by ID
-app.delete('/books/:id', (req, res) => {
-  const id = req.params.id;
-  const index = books.findIndex(book => book.id === id);
-  if (index !== -1) {
-    books.splice(index, 1);
-    res.status(204).send(); // Renvoyer une réponse 204 No Content pour indiquer que la suppression a réussi
-  } else {
-    res.status(404).send('Book not found');
+app.delete('/books/:id', async (req, res) => {
+  try {
+    await Book.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Delete an author by ID
-app.delete('/authors/:id', (req, res) => {
-  const id = req.params.id;
-  const index = authors.findIndex(author => author.id === id);
-  if (index !== -1) {
-    authors.splice(index, 1);
-    res.status(204).send(); // Renvoyer une réponse 204 No Content pour indiquer que la suppression a réussi
-  } else {
-    res.status(404).send('Author not found');
+app.delete('/authors/:id', async (req, res) => {
+  try {
+    await Author.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Delete a genre by ID
-app.delete('/genres/:id', (req, res) => {
-  const id = req.params.id;
-  const index = genres.findIndex(genre => genre.id === id);
-  if (index !== -1) {
-    genres.splice(index, 1);
-    res.status(204).send(); // Renvoyer une réponse 204 No Content pour indiquer que la suppression a réussi
-  } else {
-    res.status(404).send('Genre not found');
+app.delete('/genres/:id', async (req, res) => {
+  try {
+    await Genre.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Update a book by ID
-app.put('/books/:id', (req, res) => {
-  const id = req.params.id;
-  const index = books.findIndex(book => book.id === id);
-  if (index !== -1) {
-    const updatedBook = req.body;
-    books[index] = { ...books[index], ...updatedBook };
-    res.json(books[index]);
-  } else {
-    res.status(404).send('Book not found');
+app.put('/books/:id', async (req, res) => {
+  try {
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedBook);
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Update an author by ID
-app.put('/authors/:id', (req, res) => {
-  const id = req.params.id;
-  const index = authors.findIndex(author => author.id === id);
-  if (index !== -1) {
-    const updatedAuthor = req.body;
-    authors[index] = { ...authors[index], ...updatedAuthor };
-    res.json(authors[index]);
-  } else {
-    res.status(404).send('Author not found');
+app.put('/authors/:id', async (req, res) => {
+  try {
+    const updatedAuthor = await Author.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedAuthor);
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Update a genre by ID
-app.put('/genres/:id', (req, res) => {
-  const id = req.params.id;
-  const index = genres.findIndex(genre => genre.id === id);
-  if (index !== -1) {
-    const updatedGenre = req.body;
-    genres[index] = { ...genres[index], ...updatedGenre };
-    res.json(genres[index]);
-  } else {
-    res.status(404).send('Genre not found');
+app.put('/genres/:id', async (req, res) => {
+  try {
+    const updatedGenre = await Genre.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedGenre);
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 // Récupération de tous les livres
-app.get('/books', (req, res) => {
-  bookServiceClient.searchBooks({}, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(response.books);
-    }
-  });
+app.get('/books', async (req, res) => {
+  try {
+    const allBooks = await Book.find();
+    res.json(allBooks);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Récupération d'un livre par ID
-app.get('/books/:id', (req, res) => {
-  const id = req.params.id;
-  bookServiceClient.getBook({ bookId: id }, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
+app.get('/books/:id', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      res.status(404).send('Book not found');
     } else {
-      res.json(response.book);
+      res.json(book);
     }
-  });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Récupération de tous les auteurs
-app.get('/authors', (req, res) => {
-  authorServiceClient.searchAuthors({}, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(response.authors);
-    }
-  });
+app.get('/authors', async (req, res) => {
+  try {
+    const allAuthors = await Author.find();
+    res.json(allAuthors);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Récupération d'un auteur par ID
-app.get('/authors/:id', (req, res) => {
-  const id = req.params.id;
-  authorServiceClient.getAuthor({ authorId: id }, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
+app.get('/authors/:id', async (req, res) => {
+  try {
+    const author = await Author.findById(req.params.id);
+    if (!author) {
+      res.status(404).send('Author not found');
     } else {
-      res.json(response.author);
+      res.json(author);
     }
-  });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Récupération de tous les genres
-app.get('/genres', (req, res) => {
-  genreServiceClient.searchGenres({}, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(response.genres);
-    }
-  });
+app.get('/genres', async (req, res) => {
+  try {
+    const allGenres = await Genre.find();
+    res.json(allGenres);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Récupération d'un genre par ID
-app.get('/genres/:id', (req, res) => {
-  const id = req.params.id;
-  genreServiceClient.getGenre({ genreId: id }, (err, response) => {
-    if (err) {
-      res.status(500).send(err);
+app.get('/genres/:id', async (req, res) => {
+  try {
+    const genre = await Genre.findById(req.params.id);
+    if (!genre) {
+      res.status(404).send('Genre not found');
     } else {
-      res.json(response.genre);
+      res.json(genre);
     }
-  });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
-
 
 /******************************************************
  * Apollo Server Configuration
