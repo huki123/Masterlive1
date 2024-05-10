@@ -46,7 +46,7 @@ const authorService = {
 // Créer et démarrer le serveur gRPC
 const server = new grpc.Server();
 server.addService(authorProto.AuthorService.service, authorService);
-const port = 50051;
+const port = 50052;
 server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (err, port) => {
   if (err) {
     console.error('Échec de la liaison du serveur:', err);

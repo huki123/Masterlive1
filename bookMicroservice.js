@@ -1,7 +1,8 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const fs = require('fs');
 
-// Charger le fichier book.proto
+// Load the Book protobuf definition
 const bookProtoPath = 'book.proto';
 const bookProtoDefinition = protoLoader.loadSync(bookProtoPath, {
     keepCase: true,
@@ -13,10 +14,22 @@ const bookProtoDefinition = protoLoader.loadSync(bookProtoPath, {
 
 const bookProto = grpc.loadPackageDefinition(bookProtoDefinition).book;
 
-// Implémenter le service book
+// Implement the getAllBooks method
+function getAllBooks(call, callback) {
+    // Your implementation here to fetch all books from your data source
+    // For example:
+    const books = [
+        { id: '1', title: 'Book 1', authors: ['Author 1'], genre: 'Fiction' },
+        { id: '2', title: 'Book 2', authors: ['Author 2'], genre: 'Non-Fiction' },
+        // Add more books as needed
+    ];
+    callback(null, { books: books });
+}
+
+// Implement the book service
 const bookService = {
     getBook: (call, callback) => {
-        // Récupérer les détails du livre à partir de la base de données
+        // Retrieve book details from the database
         const book = {
             id: call.request.book_id,
             title: 'Exemple de livre',
@@ -27,13 +40,13 @@ const bookService = {
             language: 'Français',
             pages: 200,
             availability: true, 
-            // Ajouter d'autres champs de données pour le livre au besoin
+            // Add other book data fields as needed
         };
         callback(null, { book });
     },
     searchBooks: (call, callback) => {
         const { query } = call.request;
-        // Effectuer une recherche de livres en fonction de la requête
+        // Perform book search based on the query
         const books = [
             {
                 id: '1',
@@ -43,7 +56,7 @@ const bookService = {
                 publicationDate: '2024-05-07',
                 description: 'Ceci est le premier exemple de livre.',
                 language: 'Français',
-                pages: 300,
+                pageCount: 300,
                 availability: true, 
             },
             {
@@ -54,28 +67,28 @@ const bookService = {
                 publicationDate: '2024-05-07',
                 description: 'Ceci est le deuxième exemple de livre.',
                 language: 'Anglais',
-                pages: 250,
+                pageCount: 250,
                 availability: true,
             },
-            // Ajouter d'autres résultats de recherche de livres au besoin
+            // Add other book search results as needed
         ];
         callback(null, { books });
     },
-    // Ajouter d'autres méthodes au besoin
+    getAllBooks: getAllBooks, // Add the getAllBooks method here
+    // Add other methods as needed
 };
 
-// Créer et démarrer le serveur gRPC
+// Create and start the gRPC server
 const server = new grpc.Server();
 server.addService(bookProto.BookService.service, bookService);
-const port = 50052; // Choisir le port que vous préférez
-server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(),
-(err, port) => {
+const port = 50051; // Choose your preferred port
+server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (err, port) => {
     if (err) {
-        console.error('Échec de la liaison du serveur:', err);
+        console.error('Failed to bind server:', err);
         return;
     }
-    console.log(`Le serveur s'exécute sur le port ${port}`);
+    console.log(`Server is running on port ${port}`);
     server.start();
 });
 
-console.log(`Microservice de livres en cours d'exécution sur le port ${port}`);
+console.log(`Book microservice is running on port ${port}`);
